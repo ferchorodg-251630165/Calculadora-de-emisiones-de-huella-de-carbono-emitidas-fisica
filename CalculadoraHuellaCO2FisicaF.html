@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoHuella CDMX v2.5 - Calculadora de Huella de Carbono</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            bgtheme: 'var(--bg-color)',
+            cardtheme: 'var(--card-bg)',
+            cardlight: 'var(--card-light)',
+            inputtheme: 'var(--input-bg)',
+            bordertheme: 'var(--border-color)',
+            textmain: 'var(--text-main)',
+            textmuted: 'var(--text-muted)',
+            textdim: 'var(--text-dim)',
+            brand: {
+              emerald: '#10B981',
+              neon: '#00FF88',
+              amber: '#F59E0B',
+              red: '#EF4444',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & FontAwesome Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* VARIABLES PARA MODO CLARO Y OSCURO */
+    :root {
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --card-light: #f1f5f9;
+      --input-bg: #e2e8f0;
+      --border-color: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #64748b;
+    }
+    
+    .dark {
+      --bg-color: #0D1310;
+      --card-bg: #16221B;
+      --card-light: #1E2E25;
+      --input-bg: #070C0A;
+      --border-color: #2A4235;
+      --text-main: #ffffff;
+      --text-muted: #cbd5e1;
+      --text-dim: #94a3b8;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-color);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #10B981;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      background: var(--border-color);
+      height: 6px;
+      border-radius: 3px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 18px;
+      width: 18px;
+      border-radius: 50%;
+      background: #00FF88;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+      transition: all 0.15s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
+    }
+
+    .glow-neon { box-shadow: 0 0 18px -2px rgba(0, 255, 136, 0.35); }
+    .glow-emerald { box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.25); }
+    .glow-amber { box-shadow: 0 0 20px -3px rgba(245, 158, 11, 0.25); }
+    .glow-red { box-shadow: 0 0 28px -2px rgba(239, 68, 68, 0.55); }
+
+    .pulse-dot { animation: pulseDot 1.5s infinite; }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 0.3; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-brand-emerald selection:text-slate-950">
+
+  <header class="border-b border-bordertheme bg-cardtheme/90 backdrop-blur sticky top-0 z-50 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Logo & Brand -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-brand-neon/40 flex items-center justify-center text-brand-neon font-bold text-xl glow-neon">
+          🌎
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-bold text-textmain tracking-wide">EcoHuella CDMX</h1>
+            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-brand-neon border border-emerald-500/30">
+              v2.5
+            </span>
+          </div>
+          <p class="text-[11px] text-textdim">Conoce tu impacto ambiental de forma sencilla</p>
+        </div>
+      </div>
+
+      <!-- Navigation & Theme Toggle -->
+      <div class="flex items-center gap-4">
+        <button onclick="toggleTheme()" class="w-9 h-9 rounded-xl bg-inputtheme border border-bordertheme text-textmuted hover:text-brand-emerald transition-all flex items-center justify-center shadow-sm">
+          <i class="fa-solid fa-moon dark:hidden"></i>
+          <i class="fa-solid fa-sun hidden dark:inline"></i>
+        </button>
+
+        <div class="flex bg-inputtheme p-1 rounded-xl border border-bordertheme text-xs sm:text-sm font-medium">
+          <button id="btn-tab-calc" class="px-3 sm:px-4 py-1.5 rounded-lg text-white bg-brand-emerald font-semibold shadow transition-all flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-brand-neon"></i>
+            <span class="hidden sm:inline">Calculadora</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
+
+    <!-- VIEW 1: CALCULADORA DASHBOARD -->
+    <section id="view-calc" class="space-y-8">
+      
+      <div class="bg-gradient-to-r from-cardtheme via-cardlight to-emerald-900/10 border border-bordertheme rounded-2xl p-6 shadow-xl transition-colors">
+        <div class="max-w-4xl space-y-3">
+          <div class="flex items-center gap-2">
+            <h2 class="text-xl sm:text-2xl font-bold text-textmain">Calculadora de Huella de Carbono</h2>
+          </div>
+          <p class="text-textmuted text-xs sm:text-sm leading-relaxed">
+            Esta herramienta está diseñada para ayudarte a conocer y visualizar cuánto impacto generan tus actividades del día a día en el medio ambiente (tu "huella de carbono"). El objetivo no es juzgarte, sino mostrarte de forma sencilla qué áreas de tu rutina contaminan más para que juntos podamos encontrar acciones fáciles para cuidar nuestro planeta. ¡Sé lo más sincero posible!
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Column: Input Form Modules -->
+        <div class="lg:col-span-7 space-y-6">
+          
+          <!-- SECCIÓN PERFIL / DATOS GENERALES -->
+          <div class="bg-cardtheme border border-bordertheme rounded-2xl p-5 space-y-4 shadow-lg transition-colors">
+            <div class="flex items-center gap-3 border-b border-bordertheme pb-3">
+              <span class="w-8 h-8 rounded-lg bg-emerald-500/20 text-brand-neon font-bold flex items-center justify-center text-xs border border-emerald-500/30">
+                <i class="fa-solid fa-id-card"></i>
+              </span>
+              <div>
+                <h3 class="font-bold text-textmain text-sm sm:text-base">Datos Generales</h3>
+                <p class="text-xs text-textdim">Cuéntanos un poco sobre ti para agrupar tus resultados</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <!-- Rol Institucional -->
+              <div>
+                <label class="block text-textmuted font-semibold mb-1">Rol Institucional</label>
+                <select id="select-rol" onchange="handleRolChange()" class="w-full bg-inputtheme border border-bordertheme rounded-xl p-2.5 text-textmain focus:outline-none focus:border-brand-emerald">
+                  <option value="Alumno" selected>Alumno / Estudiante</option>
+                  <option value="Docente">Docente / Profesor</option>
+                  <option value="Personal Administrativo">Personal Administrativo</option>
+                </select>
+              </div>
+
+              <!-- Área (Visible solo para Alumno) -->
+              <div id="container-area">
+                <label class="block text-textmuted font-semibold mb-1">Área Académica</label>
+                <select id="select-area" onchange="handleAreaChange()" class="w-full bg-inputtheme border border-bordertheme rounded-xl p-2.5 text-textmain focus:outline-none focus:border-brand-emerald">
+                  <option value="Ingeniería" selected>Ingeniería</option>
+                  <option value="Ciencias de la Salud">Ciencias de la Salud</option>
+                  <option value="Licenciaturas">Licenciaturas</option>
+                  <option value="Preparatoria">Preparatoria</option>
+                </select>
+              </div>
+
+              <!-- Carrera (Visible solo si es Alumno y Área != Preparatoria) -->
+              <div id="container-carrera">
+                <label class="block text-textmuted font-semibold mb-1">Carrera / Programa</label>
+                <select id="select-carrera" class="w-full bg-inputtheme border border-bordertheme rounded-xl p-2.5 text-textmain focus:outline-none focus:border-brand-emerald">
+                  <!-- Opciones cargadas dinámicamente -->
+                </select>
+              </div>
+
+              <!-- Sexo / Género -->
+              <div id="container-sexo">
+                <label class="block text-textmuted font-semibold mb-1">Sexo / Género</label>
+                <select id="select-sexo" class="w-full bg-inputtheme border border-bordertheme rounded-xl p-2.5 text-textmain focus:outline-none focus:border-brand-emerald">
+                  <option value="Masculino" selected>Masculino</option>
+                  <option value="Femenino">Femenino</option>
+                  <option value="No binario">No binario</option>
+                  <option value="Prefiero no decirlo">Prefiero no decirlo</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-cardtheme border border-bordertheme rounded-2xl p-5 space-y-4 shadow-lg transition-colors">
+            <div class="flex items-center gap-3 border-b border-bordertheme pb-3">
+              <span class="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-500 font-bold flex items-center justify-center text-xs border border-teal-500/30">
+                <i class="fa-solid fa-paw"></i>
+              </span>
+              <div>
+                <h3 class="font-bold text-textmain text-sm sm:text-base">Tu Animal Favorito</h3>
+                <p class="text-xs text-textdim">Selecciona uno para mostrarte cómo impactamos su hogar en la naturaleza</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+              <button type="button" onclick="setAnimal('ajolote')" id="btn-anim-ajolote" class="p-2.5 rounded-xl border border-brand-emerald bg-brand-emerald/20 text-emerald-600 dark:text-brand-neon font-semibold text-center transition-all">
+                🦎 Ajolote
+              </button>
+              <button type="button" onclick="setAnimal('panda')" id="btn-anim-panda" class="p-2.5 rounded-xl border border-bordertheme bg-inputtheme text-textmuted hover:text-textmain font-semibold text-center transition-all">
+                🐼 Panda
+              </button>
+              <button type="button" onclick="setAnimal('leon')" id="btn-anim-leon" class="p-2.5 rounded-xl border border-bordertheme bg-inputtheme text-textmuted hover:text-textmain font-semibold text-center transition-all">
+                🦁 León
+              </button>
+              <button type="button" onclick="setAnimal('jirafa')" id="btn-anim-jirafa" class="p-2.5 rounded-xl border border-bordertheme bg-inputtheme text-textmuted hover:text-textmain font-semibold text-center transition-all">
+                🦒 Jirafa
+              </button>
+              <button type="button" onclick="setAnimal('elefante')" id="btn-anim-elefante" class="p-2.5 rounded-xl border border-bordertheme bg-inputtheme text-textmuted hover:text-textmain font-semibold text-center transition-all">
+                🐘 Elefante
+              </button>
+              <button type="button" onclick="setAnimal('osopolar')" id="btn-anim-osopolar" class="p-2.5 rounded-xl border border-bordertheme bg-inputtheme text-textmuted hover:text-textmain font-semibold text-center transition-all">
+                🐻‍❄️ Oso Polar
+              </button>
+              <button type="button" onclick="setAnimal('tigre')" id="btn-anim-tigre" class="p-2.5 rounded-xl border border-bordertheme bg-inputtheme text-textmuted hover:text-textmain font-semibold text-center transition-all">
+                🐅 Tigre
+              </button>
+              <button type="button" onclick="setAnimal('tortuga')" id="btn-anim-tortuga" class="p-2.5 rounded-xl border border-bordertheme bg-inputtheme text-textmuted hover:text-textmain font-semibold text-center transition-all">
+                🐢 Tortuga
+              </button>
+              <button type="button" onclick="setAnimal('delfin')" id="btn-anim-delfin" class="p-2.5 rounded-xl border border-bordertheme bg-inputtheme text-textmuted hover:text-textmain font-semibold text-center transition-all">
+                🐬 Delfín
+              </button>
+              <button type="button" onclick="setAnimal('pinguino')" id="btn-anim-pinguino" class="p-2.5 rounded-xl border border-bordertheme bg-inputtheme text-textmuted hover:text-textmain font-semibold text-center transition-all">
+                🐧 Pingüino
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-cardtheme border border-bordertheme rounded-2xl p-5 space-y-4 shadow-lg transition-colors">
+            <div class="flex items-center gap-3 border-b border-bordertheme pb-3">
+              <span class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-brand-neon font-bold flex items-center justify-center text-xs border border-emerald-500/30">M1</span>
+              <div>
+                <h3 class="font-bold text-textmain text-sm sm:text-base">Módulo 1: ¿Cómo te transportas?</h3>
+                <p class="text-xs text-textdim">Tus viajes al trabajo, escuela o cuando sales a pasear</p>
+              </div>
+            </div>
+
+            <!-- Mode Selector Filter -->
+            <div class="space-y-3 text-xs">
+              <div class="p-3 bg-inputtheme rounded-xl border border-bordertheme space-y-2">
+                <span class="font-semibold text-textmain block">¿Qué medios de transporte usas normalmente?</span>
+                <div class="grid grid-cols-3 gap-2">
+                  <button type="button" id="btn-mob-public" onclick="setMobilityFilter('public')" class="py-1.5 px-2 rounded-lg font-bold bg-brand-emerald text-white border border-emerald-500 shadow">Público</button>
+                  <button type="button" id="btn-mob-private" onclick="setMobilityFilter('private')" class="py-1.5 px-2 rounded-lg font-bold bg-inputtheme text-textmuted border border-bordertheme">Privado / Auto</button>
+                  <button type="button" id="btn-mob-both" onclick="setMobilityFilter('both')" class="py-1.5 px-2 rounded-lg font-bold bg-inputtheme text-textmuted border border-bordertheme">Uso Ambos</button>
+                </div>
+              </div>
+
+              <!-- Section A: Weekdays (L-V) -->
+              <div class="bg-inputtheme/60 p-3.5 rounded-xl border border-bordertheme/80 space-y-3">
+                <div class="flex justify-between items-center border-b border-bordertheme/50 pb-2">
+                  <span class="font-bold text-emerald-600 dark:text-brand-neon">De Lunes a Viernes (Escuela / Trabajo)</span>
+                  <span class="text-[11px] font-bold text-textmuted"><span id="val-dias-lv">5</span> días a la semana</span>
+                </div>
+                <div>
+                  <label class="block text-textdim mb-1">¿Cuántos días a la semana vas a la escuela o trabajo?</label>
+                  <input type="range" id="slide-dias-lv" min="1" max="5" value="5" step="1" class="w-full">
+                </div>
+
+                <!-- Public transport sliders L-V -->
+                <div id="group-public-lv" class="space-y-3 pt-2">
+                  <div>
+                    <div class="flex justify-between mb-1"><span class="text-textmuted">Metro</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-metro-lv">12</span> km/día</span></div>
+                    <input type="range" id="slide-metro-lv" min="0" max="80" value="12" step="1" class="w-full">
+                  </div>
+                  <div>
+                    <div class="flex justify-between mb-1"><span class="text-textmuted">Metrobús</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-metrobus-lv">5</span> km/día</span></div>
+                    <input type="range" id="slide-metrobus-lv" min="0" max="60" value="5" step="1" class="w-full">
+                  </div>
+                  <div>
+                    <div class="flex justify-between mb-1"><span class="text-textmuted">Trolebús / Cablebús</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-trole-lv">0</span> km/día</span></div>
+                    <input type="range" id="slide-trole-lv" min="0" max="40" value="0" step="1" class="w-full">
+                  </div>
+                  <div>
+                    <div class="flex justify-between mb-1"><span class="text-textmuted">RTP / Tren Ligero / Suburbano</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-rtp-lv">0</span> km/día</span></div>
+                    <input type="range" id="slide-rtp-lv" min="0" max="60" value="0" step="1" class="w-full">
+                  </div>
+                  <div>
+                    <div class="flex justify-between mb-1"><span class="text-textmuted">Microbús / Combi / Pesero</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-pesero-lv">4</span> km/día</span></div>
+                    <input type="range" id="slide-pesero-lv" min="0" max="50" value="4" step="1" class="w-full">
+                  </div>
+                </div>
+
+                <!-- Private transport sliders L-V -->
+                <div id="group-private-lv" class="hidden space-y-3 pt-2">
+                  <div>
+                    <div class="flex justify-between mb-1"><span class="text-textmuted">Auto de gasolina</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-autogason-lv">0</span> km/día</span></div>
+                    <input type="range" id="slide-autogason-lv" min="0" max="100" value="0" step="2" class="w-full">
+                  </div>
+                  <div>
+                    <div class="flex justify-between mb-1"><span class="text-textmuted">Auto Híbrido / Eléctrico</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-autohib-lv">0</span> km/día</span></div>
+                    <input type="range" id="slide-autohib-lv" min="0" max="100" value="0" step="2" class="w-full">
+                  </div>
+                  <div>
+                    <div class="flex justify-between mb-1"><span class="text-textmuted">Motocicleta</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-moto-lv">0</span> km/día</span></div>
+                    <input type="range" id="slide-moto-lv" min="0" max="80" value="0" step="2" class="w-full">
+                  </div>
+                  <div>
+                    <div class="flex justify-between mb-1"><span class="text-textmuted">Uber / DiDi / Taxis</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-uber-lv">0</span> km/día</span></div>
+                    <input type="range" id="slide-uber-lv" min="0" max="60" value="0" step="2" class="w-full">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section B: Weekends (S-D) -->
+              <div class="bg-inputtheme/60 p-3.5 rounded-xl border border-bordertheme/80 space-y-3">
+                <div class="flex justify-between items-center border-b border-bordertheme/50 pb-2">
+                  <span class="font-bold text-amber-600 dark:text-brand-amber">Fines de Semana (Sábado y Domingo)</span>
+                  <span class="text-[11px] font-bold text-textmuted"><span id="val-dias-sd">1</span> día que sales</span>
+                </div>
+                <div>
+                  <label class="block text-textdim mb-1">¿Cuántos días sales de tu casa el fin de semana?</label>
+                  <input type="range" id="slide-dias-sd" min="0" max="2" value="1" step="1" class="w-full">
+                </div>
+
+                <!-- Public transport sliders S-D -->
+                <div id="group-public-sd" class="space-y-3 pt-2">
+                  <div>
+                    <div class="flex justify-between mb-1"><span class="text-textmuted">Metro (Fin de semana)</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-metro-sd">8</span> km/día</span></div>
+                    <input type="range" id="slide-metro-sd" min="0" max="80" value="8" step="1" class="w-full">
+                  </div>
+                  <div>
+                    <div class="flex justify-between mb-1"><span class="text-textmuted">Metrobús (Fin de semana)</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-metrobus-sd">0</span> km/día</span></div>
+                    <input type="range" id="slide-metrobus-sd" min="0" max="60" value="0" step="1" class="w-full">
+                  </div>
+                  <div>
+                    <div class="flex justify-between mb-1"><span class="text-textmuted">Microbús / Combi (Fin de semana)</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-pesero-sd">2</span> km/día</span></div>
+                    <input type="range" id="slide-pesero-sd" min="0" max="50" value="2" step="1" class="w-full">
+                  </div>
+                </div>
+
+                <!-- Private transport sliders S-D -->
+                <div id="group-private-sd" class="hidden space-y-3 pt-2">
+                  <div>
+                    <div class="flex justify-between mb-1"><span class="text-textmuted">Auto a Gasolina (Fin de semana)</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-autogason-sd">0</span> km/día</span></div>
+                    <input type="range" id="slide-autogason-sd" min="0" max="100" value="0" step="2" class="w-full">
+                  </div>
+                  <div>
+                    <div class="flex justify-between mb-1"><span class="text-textmuted">Uber / DiDi (Fin de semana)</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-uber-sd">0</span> km/día</span></div>
+                    <input type="range" id="slide-uber-sd" min="0" max="60" value="0" step="2" class="w-full">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="bg-cardtheme border border-bordertheme rounded-2xl p-5 space-y-4 shadow-lg transition-colors">
+            <div class="flex items-center gap-3 border-b border-bordertheme pb-3">
+              <span class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-500 font-bold flex items-center justify-center text-xs border border-blue-500/30">M2</span>
+              <div>
+                <h3 class="font-bold text-textmain text-sm sm:text-base">Módulo 2: Tu Comida y Empaques</h3>
+                <p class="text-xs text-textdim">Lo que comes en la semana y los plásticos que usas</p>
+              </div>
+            </div>
+
+            <div class="space-y-3.5 text-xs">
+              <div class="font-bold text-textmain border-b border-bordertheme/40 pb-1">A) Consumo de Carne (gramos a la semana)</div>
+
+              <div>
+                <div class="flex justify-between font-medium mb-1"><span class="text-textmuted">Carne de Res (Ej. Bistec, hamburguesas, tacos)</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-carne-res">400</span> g/sem</span></div>
+                <input type="range" id="slide-carne-res" min="0" max="2500" value="400" step="50" class="w-full">
+              </div>
+
+              <div>
+                <div class="flex justify-between font-medium mb-1"><span class="text-textmuted">Carne de Cerdo (Ej. Pastor, carnitas, chuletas)</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-carne-cerdo">250</span> g/sem</span></div>
+                <input type="range" id="slide-carne-cerdo" min="0" max="2000" value="250" step="50" class="w-full">
+              </div>
+
+              <div>
+                <div class="flex justify-between font-medium mb-1"><span class="text-textmuted">Pollo o Pavo</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-carne-pollo">600</span> g/sem</span></div>
+                <input type="range" id="slide-carne-pollo" min="0" max="3000" value="600" step="50" class="w-full">
+              </div>
+
+              <div>
+                <div class="flex justify-between font-medium mb-1"><span class="text-textmuted">Pescado o Mariscos</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-carne-pescado">200</span> g/sem</span></div>
+                <input type="range" id="slide-carne-pescado" min="0" max="2000" value="200" step="50" class="w-full">
+              </div>
+
+              <div class="font-bold text-textmain border-b border-bordertheme/40 pb-1 pt-2">B) Desechables y Pedidos a Domicilio</div>
+
+              <div>
+                <div class="flex justify-between font-medium mb-1"><span class="text-textmuted">Comida en la calle/fonditas (que te den en unicel/plástico)</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-comida-calle">3</span> veces/sem</span></div>
+                <input type="range" id="slide-comida-calle" min="0" max="21" value="3" step="1" class="w-full">
+              </div>
+
+              <div>
+                <div class="flex justify-between font-medium mb-1"><span class="text-textmuted">Pedidos en apps (Rappi, UberEats, DiDi Food)</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-delivery">2</span> pedidos/sem</span></div>
+                <input type="range" id="slide-delivery" min="0" max="15" value="2" step="1" class="w-full">
+              </div>
+
+              <div>
+                <div class="flex justify-between font-medium mb-1">
+                  <span class="text-textmuted">Envolturas de basura (plásticos de galletas, papas, dulces, etc.)</span>
+                  <span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-envolturas">10</span> cosas/sem</span>
+                </div>
+                <input type="range" id="slide-envolturas" min="0" max="70" value="10" step="1" class="w-full">
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-cardtheme border border-bordertheme rounded-2xl p-5 space-y-4 shadow-lg transition-colors">
+            <div class="flex items-center gap-3 border-b border-bordertheme pb-3">
+              <span class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-500 font-bold flex items-center justify-center text-xs border border-amber-500/30">M3</span>
+              <div>
+                <h3 class="font-bold text-textmain text-sm sm:text-base">Módulo 3: Energía y Agua en Casa</h3>
+                <p class="text-xs text-textdim">Lo que gastas se dividirá entre las personas con las que vives</p>
+              </div>
+            </div>
+
+            <div class="space-y-3.5 text-xs">
+              <div class="p-3 bg-inputtheme rounded-xl border border-bordertheme flex items-center justify-between">
+                <div>
+                  <span class="font-bold text-textmain block">¿Con cuántas personas vives en tu casa?</span>
+                  <span class="text-[10px] text-textdim">Inclúyete a ti. Esto es para no cobrarte toda la luz de la casa a ti solo.</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="changeHousehold(-1)" class="w-7 h-7 rounded-lg bg-inputtheme text-textmain font-bold border border-bordertheme hover:bg-slate-300 dark:hover:bg-slate-700 transition">-</button>
+                  <span id="val-household-size" class="font-extrabold text-emerald-600 dark:text-brand-neon text-sm w-4 text-center">4</span>
+                  <button type="button" onclick="changeHousehold(1)" class="w-7 h-7 rounded-lg bg-inputtheme text-textmain font-bold border border-bordertheme hover:bg-slate-300 dark:hover:bg-slate-700 transition">+</button>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between font-medium mb-1"><span class="text-textmuted">Gas LP total consumido en casa al mes (litros)</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-gas-lp">40</span> litros/mes</span></div>
+                <input type="range" id="slide-gas-lp" min="0" max="200" value="40" step="5" class="w-full">
+              </div>
+
+              <div class="p-3 bg-inputtheme rounded-xl border border-bordertheme space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="font-semibold text-textmain">¿Cuentas con Calentador Solar de agua en casa?</span>
+                  <input type="checkbox" id="check-solar-heater" onchange="updateCalculations()" class="w-4 h-4 accent-brand-emerald rounded cursor-pointer">
+                </div>
+                <div id="badge-solar-saving" class="hidden p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-500/50 text-emerald-800 dark:text-brand-neon text-[11px] font-semibold">
+                  🌱 <strong>¡Ahorro Ecológico!</strong> Al tener calentador solar reduces mucho tu consumo de gas. Tu ahorro personal estimado es de <span id="val-solar-co2-save">0.0</span> kg CO₂e/mes y ~$<span id="val-solar-mxn-save">0</span> pesos.
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between font-medium mb-1">
+                  <span class="text-textmuted">Recibo de Luz CFE (Total de toda la casa cada 2 meses)</span>
+                  <span class="text-emerald-600 dark:text-brand-neon font-bold">$<span id="val-cfe-pesos">450</span> MXN / 2 meses</span>
+                </div>
+                <input type="range" id="slide-cfe-pesos" min="0" max="4000" value="450" step="50" class="w-full">
+              </div>
+
+              <div>
+                <div class="flex justify-between font-medium mb-1"><span class="text-textmuted">Refrescos o agua en botellas de plástico (PET) que compras a la semana</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-pet-bottles">5</span> botellas/sem</span></div>
+                <input type="range" id="slide-pet-bottles" min="0" max="40" value="5" step="1" class="w-full">
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-cardtheme border border-bordertheme rounded-2xl p-5 space-y-4 shadow-lg transition-colors">
+            <div class="flex items-center gap-3 border-b border-bordertheme pb-3">
+              <span class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-500 font-bold flex items-center justify-center text-xs border border-purple-500/30">M4</span>
+              <div>
+                <h3 class="font-bold text-textmain text-sm sm:text-base">Módulo 4: Compras por Internet y Envíos</h3>
+                <p class="text-xs text-textdim">Paquetes que llegan a tu casa (y la gasolina para traerlos)</p>
+              </div>
+            </div>
+
+            <div class="space-y-3.5 text-xs">
+              <div>
+                <div class="flex justify-between font-medium mb-1"><span class="text-textmuted">Paquetes locales (Amazon, Mercado Libre, tiendas en MX)</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-paqueteria">3</span> envíos/mes</span></div>
+                <input type="range" id="slide-paqueteria" min="0" max="30" value="3" step="1" class="w-full">
+              </div>
+
+              <div>
+                <div class="flex justify-between font-medium mb-1"><span class="text-textmuted">Compras internacionales (Shein, Temu, AliExpress, etc.)</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-fastfashion">2</span> compras/mes</span></div>
+                <input type="range" id="slide-fastfashion" min="0" max="20" value="2" step="1" class="w-full">
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-cardtheme border border-bordertheme rounded-2xl p-5 space-y-4 shadow-lg transition-colors">
+            <div class="flex items-center gap-3 border-b border-bordertheme pb-3">
+              <span class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-500 font-bold flex items-center justify-center text-xs border border-rose-500/30">M5</span>
+              <div>
+                <h3 class="font-bold text-textmain text-sm sm:text-base">Módulo 5: Viajes y Vacaciones</h3>
+                <p class="text-xs text-textdim">Salidas fuera de tu ciudad en el año</p>
+              </div>
+            </div>
+
+            <div class="space-y-3.5 text-xs">
+              <div class="p-3 bg-inputtheme rounded-xl border border-bordertheme space-y-2">
+                <span class="font-semibold text-textmain block">¿Sales de viaje fuera de tu ciudad durante el año?</span>
+                <div class="grid grid-cols-2 gap-2">
+                  <button type="button" id="btn-travel-no" onclick="setTravelsActive(false)" class="py-1.5 px-2 rounded-lg font-bold bg-brand-emerald text-white border border-emerald-500 shadow">No viajo</button>
+                  <button type="button" id="btn-travel-yes" onclick="setTravelsActive(true)" class="py-1.5 px-2 rounded-lg font-bold bg-inputtheme text-textmuted border border-bordertheme">Sí viajo</button>
+                </div>
+              </div>
+
+              <div id="group-travel-sliders" class="hidden space-y-3 pt-2">
+                <div>
+                  <div class="flex justify-between font-medium mb-1"><span class="text-textmuted">¿Cuántos viajes haces al AÑO en total?</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-travel-qty">2</span> viajes/año</span></div>
+                  <input type="range" id="slide-travel-qty" min="0" max="30" value="2" step="1" class="w-full">
+                </div>
+
+                <div id="group-travel-km-sliders" class="space-y-3">
+                  <p class="text-[10px] text-textdim italic mt-2">Calcula aprox. cuántos kilómetros de ida y vuelta son por viaje:</p>
+                  <div>
+                    <div class="flex justify-between font-medium mb-1"><span class="text-textmuted">Viaje en Auto (km por viaje)</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-travel-auto-km">300</span> km/viaje</span></div>
+                    <input type="range" id="slide-travel-auto-km" min="0" max="2000" value="300" step="50" class="w-full">
+                  </div>
+                  <div>
+                    <div class="flex justify-between font-medium mb-1"><span class="text-textmuted">Viaje en Autobús (km por viaje)</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-travel-bus-km">0</span> km/viaje</span></div>
+                    <input type="range" id="slide-travel-bus-km" min="0" max="2000" value="0" step="50" class="w-full">
+                  </div>
+                  <div>
+                    <div class="flex justify-between font-medium mb-1"><span class="text-textmuted">Viaje en Avión (km por viaje)</span><span class="text-emerald-600 dark:text-brand-neon font-bold"><span id="val-travel-plane-km">0</span> km/viaje</span></div>
+                    <input type="range" id="slide-travel-plane-km" min="0" max="8000" value="0" step="200" class="w-full">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-cardtheme border border-bordertheme rounded-2xl p-5 space-y-4 shadow-lg transition-colors">
+            <div class="flex items-center gap-3 border-b border-bordertheme pb-3">
+              <span class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-brand-neon font-bold flex items-center justify-center text-xs border border-emerald-500/30">M6</span>
+              <div>
+                <h3 class="font-bold text-textmain text-sm sm:text-base">Módulo 6: ¿Cómo manejas tu basura?</h3>
+                <p class="text-xs text-textdim">Separar previene gases muy contaminantes</p>
+              </div>
+            </div>
+
+            <div class="space-y-3 text-xs">
+              <div class="p-3 bg-inputtheme rounded-xl border border-bordertheme space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="font-semibold text-textmain">¿Separas tu basura en Orgánica e Inorgánica en tu casa?</span>
+                  <input type="checkbox" id="check-separa-basura" checked onchange="updateCalculations()" class="w-4 h-4 accent-brand-emerald rounded cursor-pointer">
+                </div>
+                <p id="desc-separa-basura" class="text-[11px] text-textmuted leading-relaxed">
+                  🌱 <strong>¡Punto Extra!</strong> Al separar, restas <strong>-10 kg de CO₂e al mes</strong> porque evitas que la comida se pudra mal y genere gas metano.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Results Dashboard -->
+        <div class="lg:col-span-5 space-y-6">
+          <div id="card-results-container" class="bg-cardtheme border border-bordertheme rounded-2xl p-6 sticky top-20 space-y-6 shadow-2xl transition-all duration-300 glow-emerald">
+            
+            <div class="flex items-center justify-between border-b border-bordertheme pb-3">
+              <h3 class="font-bold text-textmain text-base flex items-center gap-2">
+                <i class="fa-solid fa-earth-americas text-emerald-600 dark:text-brand-neon"></i>
+                <span>Tus Resultados</span>
+              </h3>
+              <span id="result-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-700 dark:text-brand-neon border border-emerald-500/30">
+                Calculando...
+              </span>
+            </div>
+
+            <!-- Total Monthly Emissions -->
+            <div id="co2-display-box" class="bg-inputtheme border border-bordertheme rounded-2xl p-5 text-center relative overflow-hidden transition-all duration-300">
+              <span class="text-xs font-bold text-textdim uppercase tracking-widest block mb-1">Tu Huella de Carbono al Mes</span>
+              <div class="text-4xl sm:text-5xl font-extrabold flex items-baseline justify-center gap-1.5 py-1 transition-colors duration-300">
+                <span id="out-co2" class="text-emerald-600 dark:text-brand-neon">0.00</span>
+                <span class="text-base font-semibold text-textmuted">kg de CO₂e</span>
+              </div>
+              <p class="text-[11px] text-textdim mt-2">Es lo que tú solo generas, ajustado a tu ciudad</p>
+            </div>
+
+            <!-- CFE Report Callout -->
+            <div class="bg-inputtheme p-3 rounded-xl border border-bordertheme text-xs space-y-1">
+              <span class="font-bold text-emerald-600 dark:text-brand-neon block flex items-center gap-1.5">
+                <i class="fa-solid fa-bolt"></i>
+                <span>Tus gastos de luz</span>
+              </span>
+              <p class="text-textmuted text-[11px] leading-relaxed">
+                De los $<span id="out-cfe-pesos">0</span> de tu recibo, a ti te tocan <strong class="text-emerald-600 dark:text-brand-neon"><span id="out-cfe-kwh">0</span> kWh</strong> de energía al mes.
+              </p>
+            </div>
+
+            <!-- CDMX Reference Scale Card -->
+            <div class="bg-inputtheme p-3.5 rounded-xl border border-bordertheme text-xs space-y-2">
+              <span class="font-bold text-textmuted block text-[11px] uppercase tracking-wider">Escala para saber cómo vas:</span>
+              <div class="grid grid-cols-3 gap-1.5 text-[10px] font-semibold text-center">
+                <div class="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800/80 text-emerald-700 dark:text-brand-neon">
+                  &lt; 150 kg<br><span class="font-normal opacity-90">Sostenible 🍃</span>
+                </div>
+                <div class="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/80 text-amber-700 dark:text-brand-amber">
+                  150 a 300 kg<br><span class="font-normal opacity-90">Moderado ⚠️</span>
+                </div>
+                <div class="p-1.5 rounded-lg bg-rose-100 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800/80 text-rose-700 dark:text-brand-red">
+                  &gt; 300 kg<br><span class="font-normal opacity-90">Crítico 🚨</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Top 3 Drivers Breakdown -->
+            <div class="space-y-2">
+              <h4 class="text-xs font-bold text-textdim uppercase tracking-wider">Lo que más contaminó de tu rutina:</h4>
+              <div id="out-top-drivers" class="space-y-2 text-xs">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+
+            <div id="card-animal-impact" class="bg-gradient-to-br from-rose-100 dark:from-rose-950/50 via-cardlight to-cardtheme border-2 border-rose-300 dark:border-rose-500/60 p-4 rounded-2xl shadow-xl space-y-2 relative overflow-hidden transition-colors">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-skull-crossbones text-brand-red"></i>
+                  <span>Impacto en los Animales</span>
+                </span>
+                <span id="out-animal-icon" class="text-2xl">🦎</span>
+              </div>
+
+              <!-- GIANT BOLD RED TYPOGRAPHY -->
+              <div class="py-1 text-center">
+                <span id="out-animal-big-num" class="text-3xl sm:text-4xl font-black text-rose-600 dark:text-brand-red tracking-tight">
+                  141 Ajolotes
+                </span>
+              </div>
+
+              <p id="out-animal-dramatic-text" class="text-[11px] sm:text-xs text-textmain leading-relaxed font-medium bg-inputtheme/80 p-3 rounded-xl border border-rose-200 dark:border-rose-900/60">
+                Cargando impacto ambiental...
+              </p>
+            </div>
+
+            <!-- Tangible Equivalencies -->
+            <div class="border-t border-bordertheme pt-4 space-y-3">
+              <h4 class="text-xs font-bold text-emerald-600 dark:text-brand-neon uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-scale-balanced"></i>
+                <span>Tus emisiones equivalen a...</span>
+              </h4>
+
+              <div class="grid grid-cols-3 gap-2 text-xs">
+                <div class="bg-inputtheme p-2.5 rounded-xl border border-bordertheme text-center">
+                  <div class="text-rose-600 dark:text-brand-red font-bold text-[11px] mb-0.5 flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-smoking"></i>
+                    <span>Cigarros</span>
+                  </div>
+                  <div class="text-base font-extrabold text-textmain"><span id="out-cigarettes">0</span></div>
+                  <p class="text-[9px] text-textdim mt-0.5">encendidos al mes</p>
+                </div>
+
+                <div class="bg-inputtheme p-2.5 rounded-xl border border-bordertheme text-center">
+                  <div class="text-amber-600 dark:text-brand-amber font-bold text-[11px] mb-0.5 flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-car"></i>
+                    <span>Auto Gasolina</span>
+                  </div>
+                  <div class="text-base font-extrabold text-textmain"><span id="out-auto-km">0</span></div>
+                  <p class="text-[9px] text-textdim mt-0.5">km manejados</p>
+                </div>
+
+                <div class="bg-inputtheme p-2.5 rounded-xl border border-bordertheme text-center">
+                  <div class="text-emerald-600 dark:text-brand-emerald font-bold text-[11px] mb-0.5 flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-tree"></i>
+                    <span>Árboles</span>
+                  </div>
+                  <div class="text-base font-extrabold text-textmain"><span id="out-trees">0</span></div>
+                  <p class="text-[9px] text-textdim mt-0.5">necesarios para limpiar</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-bordertheme pt-4 space-y-2">
+              <h4 class="text-xs font-bold text-emerald-600 dark:text-brand-neon uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-seedling"></i>
+                <span>Ideas Fáciles para Mejorar</span>
+              </h4>
+              <div id="out-action-plan-dynamic" class="space-y-2 text-xs text-textmuted">
+                <!-- Injected dynamically via JS -->
+              </div>
+            </div>
+
+            <!-- GOOGLE SHEETS BUTTON -->
+            <div class="pt-4">
+              <button id="btn-enviar-datos" onclick="enviarResultados()" class="w-full bg-brand-emerald hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl text-sm transition-all shadow-lg flex justify-center items-center gap-2">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>Guardar y Enviar mis Resultados</span>
+              </button>
+              <p class="text-[10px] text-center text-textdim mt-2">Al dar clic, tus resultados se registrarán automáticamente en el Excel para comparativas.</p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // --- INTEGRACIÓN GOOGLE SHEETS ---
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhuYOg-Ouw9LUZtR5lpzNRd4oskL7y-A3C8bwmr7YDlnF2CuZ2nIPIo76hnxCb5JeeyA/exec"; 
+
+    // THEME TOGGLE
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    // LISTAS DE CARRERAS SEGÚN ÁREA
+    const carrerasPorArea = {
+      "Ciencias de la Salud": [
+        "Medicina",
+        "Enfermería",
+        "Fisioterapia",
+        "Medicina Veterinaria y Zootecnia",
+        "Biología",
+        "Bioquímica",
+        "Cirujano Dentista",
+        "Cultura Física y Deporte",
+        "Nutrición",
+        "Químico Farmacéutico Biotecnólogo",
+        "Psicología",
+        "Otra"
+      ],
+      "Ingeniería": [
+        "Ingeniería Biomédica",
+        "Ingeniería en Animación e Interactividad",
+        "Ingeniería en Desarrollo de Videojuegos",
+        "Ingeniería en Robótica",
+        "Ingeniería Civil",
+        "Ingeniería en Energía y Desarrollo Sostenible",
+        "Ingeniería en Sistemas Computacionales",
+        "Ingeniería en Telecomunicaciones y Electrónica",
+        "Ingeniería Industrial y de Sistemas",
+        "Ingeniería Mecánica Industrial",
+        "Ingeniería Mecatrónica",
+        "Ingeniería Mecatrónica con enfoque automotriz",
+        "Ingeniería Petrolera",
+        "Otra"
+      ],
+      "Licenciaturas": [
+        "Actuaría",
+        "Comunicación y medios digitales",
+        "Derecho",
+        "Relaciones Internacionales",
+        "Arquitectura",
+        "Diseño de Interiores",
+        "Diseño Digital",
+        "Administración",
+        "Administración de Negocios Internacionales",
+        "Criminología",
+        "Pedagogía",
+        "Relaciones Públicas",
+        "Otra"
+      ]
+    };
+
+    // Variables globales para el Top 3 actual
+    let currentTop1 = "N/A";
+    let currentTop2 = "N/A";
+    let currentTop3 = "N/A";
+
+    // LÓGICA DE CAMBIO DE ROL INSTITUCIONAL Y ÁREA
+    function handleRolChange() {
+      const rol = document.getElementById('select-rol').value;
+      const areaContainer = document.getElementById('container-area');
+      const carreraContainer = document.getElementById('container-carrera');
+
+      if (rol === 'Docente' || rol === 'Personal Administrativo') {
+        areaContainer.classList.add('hidden');
+        carreraContainer.classList.add('hidden');
+      } else {
+        areaContainer.classList.remove('hidden');
+        handleAreaChange();
+      }
+    }
+
+    function handleAreaChange() {
+      const area = document.getElementById('select-area').value;
+      const carreraContainer = document.getElementById('container-carrera');
+      const carreraSelect = document.getElementById('select-carrera');
+
+      if (area === 'Preparatoria') {
+        carreraContainer.classList.add('hidden');
+      } else {
+        carreraContainer.classList.remove('hidden');
+        carreraSelect.innerHTML = '';
+        
+        const lista = carrerasPorArea[area] || [];
+        lista.forEach(carrera => {
+          const opt = document.createElement('option');
+          opt.value = carrera;
+          opt.textContent = carrera;
+          carreraSelect.appendChild(opt);
+        });
+      }
+    }
+
+    // Global State Variables
+    let selectedAnimalKey = 'ajolote';
+    let mobilityMode = 'public'; 
+    let travelsActive = false;
+    let householdSize = 4;
+
+    function setAnimal(key) {
+      selectedAnimalKey = key;
+      const keys = ['ajolote', 'panda', 'leon', 'jirafa', 'elefante', 'osopolar', 'tigre', 'tortuga', 'delfin', 'pinguino'];
+      keys.forEach(k => {
+        const btn = document.getElementById('btn-anim-' + k);
+        if (btn) {
+          if (k === key) {
+            btn.className = "p-2.5 rounded-xl border border-brand-emerald bg-brand-emerald/20 text-emerald-600 dark:text-brand-neon font-semibold text-center transition-all";
+          } else {
+            btn.className = "p-2.5 rounded-xl border border-bordertheme bg-inputtheme text-textmuted hover:text-textmain font-semibold text-center transition-all";
+          }
+        }
+      });
+      updateCalculations();
+    }
+
+    function setMobilityFilter(mode) {
+      mobilityMode = mode;
+      const bPublic = document.getElementById('btn-mob-public');
+      const bPrivate = document.getElementById('btn-mob-private');
+      const bBoth = document.getElementById('btn-mob-both');
+
+      const inactiveClasses = "py-1.5 px-2 rounded-lg font-bold bg-inputtheme text-textmuted border border-bordertheme";
+      const activeClasses = "py-1.5 px-2 rounded-lg font-bold bg-brand-emerald text-white border border-emerald-500 shadow";
+
+      bPublic.className = inactiveClasses;
+      bPrivate.className = inactiveClasses;
+      bBoth.className = inactiveClasses;
+
+      const grpPubLV = document.getElementById('group-public-lv');
+      const grpPrivLV = document.getElementById('group-private-lv');
+      const grpPubSD = document.getElementById('group-public-sd');
+      const grpPrivSD = document.getElementById('group-private-sd');
+
+      if (mode === 'public') {
+        bPublic.className = activeClasses;
+        grpPubLV.classList.remove('hidden');
+        grpPrivLV.classList.add('hidden');
+        grpPubSD.classList.remove('hidden');
+        grpPrivSD.classList.add('hidden');
+      } else if (mode === 'private') {
+        bPrivate.className = activeClasses;
+        grpPubLV.classList.add('hidden');
+        grpPrivLV.classList.remove('hidden');
+        grpPubSD.classList.add('hidden');
+        grpPrivSD.classList.remove('hidden');
+      } else {
+        bBoth.className = activeClasses;
+        grpPubLV.classList.remove('hidden');
+        grpPrivLV.classList.remove('hidden');
+        grpPubSD.classList.remove('hidden');
+        grpPrivSD.classList.remove('hidden');
+      }
+
+      updateCalculations();
+    }
+
+    function changeHousehold(delta) {
+      householdSize = Math.max(1, Math.min(15, householdSize + delta));
+      document.getElementById('val-household-size').innerText = householdSize;
+      updateCalculations();
+    }
+
+    function setTravelsActive(active) {
+      travelsActive = active;
+      const bNo = document.getElementById('btn-travel-no');
+      const bYes = document.getElementById('btn-travel-yes');
+      const grp = document.getElementById('group-travel-sliders');
+      
+      const inactiveClasses = "py-1.5 px-2 rounded-lg font-bold bg-inputtheme text-textmuted border border-bordertheme";
+      const activeClasses = "py-1.5 px-2 rounded-lg font-bold bg-brand-emerald text-white border border-emerald-500 shadow";
+
+      if (active) {
+        bYes.className = activeClasses;
+        bNo.className = inactiveClasses;
+        grp.classList.remove('hidden');
+      } else {
+        bNo.className = activeClasses;
+        bYes.className = inactiveClasses;
+        grp.classList.add('hidden');
+        document.getElementById('slide-travel-qty').value = 0;
+        document.getElementById('val-travel-qty').innerText = 0;
+      }
+      updateCalculations();
+    }
+
+    const sliderIds = [
+      'dias-lv', 'metro-lv', 'metrobus-lv', 'trole-lv', 'rtp-lv', 'pesero-lv',
+      'autogason-lv', 'autohib-lv', 'moto-lv', 'uber-lv',
+      'dias-sd', 'metro-sd', 'metrobus-sd', 'pesero-sd',
+      'autogason-sd', 'uber-sd',
+      'carne-res', 'carne-cerdo', 'carne-pollo', 'carne-pescado',
+      'comida-calle', 'delivery', 'envolturas',
+      'gas-lp', 'cfe-pesos', 'pet-bottles',
+      'paqueteria', 'fastfashion',
+      'travel-qty', 'travel-auto-km', 'travel-bus-km', 'travel-plane-km'
+    ];
+
+    sliderIds.forEach(id => {
+      const el = document.getElementById('slide-' + id);
+      const valEl = document.getElementById('val-' + id);
+      if (el && valEl) {
+        el.addEventListener('input', (e) => {
+          valEl.innerText = e.target.value;
+
+          if (id === 'travel-qty') {
+            const qty = parseInt(e.target.value);
+            const kmGroup = document.getElementById('group-travel-km-sliders');
+            if (qty === 0) {
+              kmGroup.classList.add('hidden');
+            } else {
+              kmGroup.classList.remove('hidden');
+            }
+          }
+
+          updateCalculations();
+        });
+      }
+    });
+
+    function updateCalculations() {
+      // 1. Mobility
+      const diasLV = parseFloat(document.getElementById('slide-dias-lv').value) || 0;
+      const metroLV = mobilityMode !== 'private' ? (parseFloat(document.getElementById('slide-metro-lv').value) || 0) : 0;
+      const metrobusLV = mobilityMode !== 'private' ? (parseFloat(document.getElementById('slide-metrobus-lv').value) || 0) : 0;
+      const troleLV = mobilityMode !== 'private' ? (parseFloat(document.getElementById('slide-trole-lv').value) || 0) : 0;
+      const rtpLV = mobilityMode !== 'private' ? (parseFloat(document.getElementById('slide-rtp-lv').value) || 0) : 0;
+      const peseroLV = mobilityMode !== 'private' ? (parseFloat(document.getElementById('slide-pesero-lv').value) || 0) : 0;
+
+      const autoGasonLV = mobilityMode !== 'public' ? (parseFloat(document.getElementById('slide-autogason-lv').value) || 0) : 0;
+      const autoHibLV = mobilityMode !== 'public' ? (parseFloat(document.getElementById('slide-autohib-lv').value) || 0) : 0;
+      const motoLV = mobilityMode !== 'public' ? (parseFloat(document.getElementById('slide-moto-lv').value) || 0) : 0;
+      const uberLV = mobilityMode !== 'public' ? (parseFloat(document.getElementById('slide-uber-lv').value) || 0) : 0;
+
+      const diasSD = parseFloat(document.getElementById('slide-dias-sd').value) || 0;
+      const metroSD = mobilityMode !== 'private' ? (parseFloat(document.getElementById('slide-metro-sd').value) || 0) : 0;
+      const metrobusSD = mobilityMode !== 'private' ? (parseFloat(document.getElementById('slide-metrobus-sd').value) || 0) : 0;
+      const peseroSD = mobilityMode !== 'private' ? (parseFloat(document.getElementById('slide-pesero-sd').value) || 0) : 0;
+
+      const autoGasonSD = mobilityMode !== 'public' ? (parseFloat(document.getElementById('slide-autogason-sd').value) || 0) : 0;
+      const uberSD = mobilityMode !== 'public' ? (parseFloat(document.getElementById('slide-uber-sd').value) || 0) : 0;
+
+      // 2. Food & Packaging
+      const carneResGrams = parseFloat(document.getElementById('slide-carne-res').value) || 0;
+      const carneCerdoGrams = parseFloat(document.getElementById('slide-carne-cerdo').value) || 0;
+      const carnePolloGrams = parseFloat(document.getElementById('slide-carne-pollo').value) || 0;
+      const carnePescadoGrams = parseFloat(document.getElementById('slide-carne-pescado').value) || 0;
+
+      const comidaCalle = parseFloat(document.getElementById('slide-comida-calle').value) || 0;
+      const delivery = parseFloat(document.getElementById('slide-delivery').value) || 0;
+      const envolturas = parseFloat(document.getElementById('slide-envolturas').value) || 0;
+
+      // 3. Home Energy
+      const rawGasLiters = parseFloat(document.getElementById('slide-gas-lp').value) || 0;
+      const hasSolar = document.getElementById('check-solar-heater').checked;
+      const effectiveGasLiters = hasSolar ? (rawGasLiters * 0.3) : rawGasLiters;
+      const gGasPerCapitaMonthly = ((effectiveGasLiters * 1.61) / householdSize) * 1000;
+
+      const badgeSolar = document.getElementById('badge-solar-saving');
+      if (hasSolar) {
+        badgeSolar.classList.remove('hidden');
+        const savedKgCo2 = ((rawGasLiters * 0.7 * 1.61) / householdSize).toFixed(1);
+        const savedMxn = Math.round((rawGasLiters * 0.7 * 11) / householdSize);
+        document.getElementById('val-solar-co2-save').innerText = savedKgCo2;
+        document.getElementById('val-solar-mxn-save').innerText = savedMxn;
+      } else {
+        badgeSolar.classList.add('hidden');
+      }
+
+      const cfePesosBimestral = parseFloat(document.getElementById('slide-cfe-pesos').value) || 0;
+      const cfePesosMonthly = cfePesosBimestral / 2;
+      const cfeKwhMonthly = cfePesosMonthly / 2.25; 
+      const gCfePerCapitaMonthly = ((cfeKwhMonthly * 0.435) / householdSize) * 1000;
+
+      document.getElementById('out-cfe-pesos').innerText = Math.round(cfePesosBimestral);
+      document.getElementById('out-cfe-kwh').innerText = Math.round(cfeKwhMonthly);
+
+      const petBottles = parseFloat(document.getElementById('slide-pet-bottles').value) || 0;
+      const gPetMonthly = (petBottles * 0.080 * 4.33) * 1000;
+
+      // 4. Imports & Packages
+      const paqueteria = parseFloat(document.getElementById('slide-paqueteria').value) || 0;
+      const fastfashion = parseFloat(document.getElementById('slide-fastfashion').value) || 0;
+
+      // 5. Travel
+      const travelQty = travelsActive ? (parseFloat(document.getElementById('slide-travel-qty').value) || 0) : 0;
+      const travelAutoKm = parseFloat(document.getElementById('slide-travel-auto-km').value) || 0;
+      const travelBusKm = parseFloat(document.getElementById('slide-travel-bus-km').value) || 0;
+      const travelPlaneKm = parseFloat(document.getElementById('slide-travel-plane-km').value) || 0;
+
+      const gTravelMonthly = travelsActive && travelQty > 0 ? (
+        ((travelAutoKm * 0.170 + travelBusKm * 0.040 + travelPlaneKm * 0.200) * travelQty / 12) * 1000
+      ) : 0;
+
+      // 6. Waste Separation
+      const separaBasura = document.getElementById('check-separa-basura').checked;
+      const descBasura = document.getElementById('desc-separa-basura');
+
+      if (separaBasura) {
+        descBasura.innerHTML = `🌱 <strong>¡Punto Extra!</strong> Al separar, restas <strong>-10 kg de CO₂e al mes</strong> porque evitas que la comida se pudra mal y genere gas metano.`;
+      } else {
+        descBasura.innerHTML = `⚠️ <strong>Cuidado:</strong> Al no separar, sumas <strong>+15 kg de CO₂e al mes</strong> porque tu basura orgánica se mezcla y produce gases muy contaminantes (Metano).`;
+      }
+
+      const habitDrivers = [
+        { key: 'transport_public', category: 'transporte', name: "Transporte Público", gMonthly: (metroLV*0.033 + metrobusLV*0.045 + troleLV*0.020 + rtpLV*0.040 + peseroLV*0.095)*diasLV*4.33*1000 + (metroSD*0.033 + metrobusSD*0.045 + peseroSD*0.095)*diasSD*4.33*1000 },
+        { key: 'transport_private', category: 'transporte_privado', name: "Auto Privado o Taxis", gMonthly: (autoGasonLV*0.190 + autoHibLV*0.085 + motoLV*0.090 + uberLV*0.210)*diasLV*4.33*1000 + (autoGasonSD*0.190 + uberSD*0.210)*diasSD*4.33*1000 },
+        { key: 'meat_res', category: 'alimentacion', name: "Comer Carne de Res", gMonthly: (carneResGrams * 0.027 * 4.33) * 1000 },
+        { key: 'meat_other', category: 'alimentacion', name: "Comer Pollo, Cerdo o Pescado", gMonthly: (carneCerdoGrams*0.012 + carnePolloGrams*0.006 + carnePescadoGrams*0.005)*4.33*1000 },
+        { key: 'takeout_packaging', category: 'desechables', name: "Desechables de Comida/Envolturas", gMonthly: (comidaCalle*0.080 + delivery*0.450 + envolturas*0.050)*4.33*1000 },
+        { key: 'gas_household', category: 'energia', name: "Uso de Gas (Cocinar/Bañarte)", gMonthly: gGasPerCapitaMonthly },
+        { key: 'electricity', category: 'energia', name: "Luz Eléctrica de la casa", gMonthly: gCfePerCapitaMonthly },
+        { key: 'pet_bottles', category: 'desechables', name: "Comprar botellas PET", gMonthly: gPetMonthly },
+        { key: 'shopping_imports', category: 'compras', name: "Compras en línea del extranjero", gMonthly: (fastfashion * 2.50) * 1000 },
+        { key: 'local_packages', category: 'compras', name: "Envíos por paquetería local", gMonthly: (paqueteria * 0.650) * 1000 },
+        { key: 'interurban_travel', category: 'viajes', name: "Viajes de vacaciones/foráneos", gMonthly: gTravelMonthly },
+        { key: 'unseparated_waste', category: 'basura', name: "No Separar la Basura", gMonthly: separaBasura ? 0 : 15000 }
+      ];
+
+      const totalGramsMonthly = habitDrivers.reduce((acc, h) => acc + h.gMonthly, 0);
+      const totalKgMonthly = totalGramsMonthly / 1000;
+
+      // Update Result Box UI
+      const outCo2El = document.getElementById('out-co2');
+      const badge = document.getElementById('result-badge');
+      const co2BoxEl = document.getElementById('co2-display-box');
+      const resultsContainerEl = document.getElementById('card-results-container');
+
+      outCo2El.innerText = totalKgMonthly.toFixed(2);
+
+      if (totalKgMonthly < 150) {
+        outCo2El.className = "text-emerald-600 dark:text-brand-neon";
+        badge.className = "px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-700 dark:text-brand-neon border border-emerald-500/30";
+        badge.innerText = "¡Vas muy bien!";
+        co2BoxEl.className = "bg-inputtheme border border-emerald-500/40 rounded-2xl p-5 text-center relative overflow-hidden transition-all duration-300 shadow-md";
+        resultsContainerEl.className = "bg-cardtheme border border-bordertheme rounded-2xl p-6 sticky top-20 space-y-6 shadow-2xl transition-all duration-300 glow-neon";
+      } else if (totalKgMonthly <= 300) {
+        outCo2El.className = "text-amber-600 dark:text-brand-amber";
+        badge.className = "px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-700 dark:text-brand-amber border border-amber-500/30";
+        badge.innerText = "Podrías mejorar";
+        co2BoxEl.className = "bg-inputtheme border border-amber-500/40 rounded-2xl p-5 text-center relative overflow-hidden transition-all duration-300 shadow-md";
+        resultsContainerEl.className = "bg-cardtheme border border-bordertheme rounded-2xl p-6 sticky top-20 space-y-6 shadow-2xl transition-all duration-300 glow-amber";
+      } else {
+        outCo2El.className = "text-rose-600 dark:text-brand-red";
+        badge.className = "px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-700 dark:text-brand-red border border-rose-500/30";
+        badge.innerText = "¡Hay que hacer cambios!";
+        co2BoxEl.className = "bg-inputtheme border border-rose-500/40 rounded-2xl p-5 text-center relative overflow-hidden transition-all duration-300 shadow-md";
+        resultsContainerEl.className = "bg-cardtheme border border-bordertheme rounded-2xl p-6 sticky top-20 space-y-6 shadow-2xl transition-all duration-300 glow-red";
+      }
+
+      // Top 3 Drivers
+      habitDrivers.sort((a, b) => b.gMonthly - a.gMonthly);
+      const top1 = habitDrivers[0];
+      const top2 = habitDrivers[1];
+      const top3 = habitDrivers[2];
+
+      const topContainer = document.getElementById('out-top-drivers');
+      const pct1 = totalGramsMonthly > 0 ? Math.max(0, ((top1.gMonthly / totalGramsMonthly) * 100)).toFixed(0) : 0;
+      const pct2 = totalGramsMonthly > 0 ? Math.max(0, ((top2.gMonthly / totalGramsMonthly) * 100)).toFixed(0) : 0;
+      const pct3 = totalGramsMonthly > 0 ? Math.max(0, ((top3.gMonthly / totalGramsMonthly) * 100)).toFixed(0) : 0;
+
+      // Asignar variables globales para envío
+      currentTop1 = `${top1.name} (${pct1}%, ${(top1.gMonthly / 1000).toFixed(1)} kg)`;
+      currentTop2 = `${top2.name} (${pct2}%, ${(top2.gMonthly / 1000).toFixed(1)} kg)`;
+      currentTop3 = `${top3.name} (${pct3}%, ${(top3.gMonthly / 1000).toFixed(1)} kg)`;
+
+      topContainer.innerHTML = `
+        <div class="bg-inputtheme p-2.5 rounded-xl border border-bordertheme flex items-center justify-between">
+          <div>
+            <span class="font-semibold text-textmain block">${top1.name}</span>
+            <span class="text-[10px] text-textdim">${(top1.gMonthly / 1000).toFixed(1)} kg CO₂e</span>
+          </div>
+          <span class="text-xs font-extrabold text-rose-500 dark:text-brand-red">${pct1}%</span>
+        </div>
+        <div class="bg-inputtheme p-2.5 rounded-xl border border-bordertheme flex items-center justify-between">
+          <div>
+            <span class="font-semibold text-textmain block">${top2.name}</span>
+            <span class="text-[10px] text-textdim">${(top2.gMonthly / 1000).toFixed(1)} kg CO₂e</span>
+          </div>
+          <span class="text-xs font-extrabold text-amber-500 dark:text-brand-amber">${pct2}%</span>
+        </div>
+        <div class="bg-inputtheme p-2.5 rounded-xl border border-bordertheme flex items-center justify-between">
+          <div>
+            <span class="font-semibold text-textmain block">${top3.name}</span>
+            <span class="text-[10px] text-textdim">${(top3.gMonthly / 1000).toFixed(1)} kg CO₂e</span>
+          </div>
+          <span class="text-xs font-extrabold text-emerald-500 dark:text-brand-neon">${pct3}%</span>
+        </div>
+      `;
+
+      renderBiologicalAnimalImpact(selectedAnimalKey, totalKgMonthly);
+
+      // Tangible Equivalencies
+      const cigarettes = Math.round(totalKgMonthly * 71);
+      const autoKmEq = Math.round(totalKgMonthly / 0.190);
+      const treesNeeded = Math.ceil((totalKgMonthly * 12) / 22);
+
+      document.getElementById('out-cigarettes').innerText = cigarettes.toLocaleString("en-US");
+      document.getElementById('out-auto-km').innerText = autoKmEq.toLocaleString("en-US");
+      document.getElementById('out-trees').innerText = treesNeeded.toLocaleString("en-US");
+
+      renderActionPlanDynamic(habitDrivers);
+    }
+
+    function renderBiologicalAnimalImpact(animalKey, totalKgMonthly) {
+      const iconEl = document.getElementById('out-animal-icon');
+      const bigNumEl = document.getElementById('out-animal-big-num');
+      const textEl = document.getElementById('out-animal-dramatic-text');
+
+      const annualKg = totalKgMonthly * 12;
+
+      const animalData = {
+        ajolote: {
+          icon: '🦎',
+          getStat: (kg) => `${Math.round(kg * 0.085).toLocaleString("en-US")} Ajolotes al año`,
+          getText: (kg) => `⚠️ Tu contaminación daña el agua limpia. Tu impacto del año equivale a impedir que nazcan <strong>${Math.round(kg * 0.085)} ajolotes</strong> en los canales de Xochimilco.`
+        },
+        panda: {
+          icon: '🐼',
+          getStat: (kg) => `${Math.round(kg * 0.042).toLocaleString("en-US")} m² de Bambú`,
+          getText: (kg) => `⚠️ Tus emisiones generan calor que seca los bosques. Al año esto destruye la comida equivalente a <strong>${Math.round(kg * 0.042)} metros de bambú vital</strong> para el oso panda.`
+        },
+        leon: {
+          icon: '🦁',
+          getStat: (kg) => `${Math.round(kg * 0.035).toLocaleString("en-US")} m² de Sabana`,
+          getText: (kg) => `⚠️ El cambio de clima global acelera las sequías. Esto destruye poco a poco el territorio natural donde los leones cazan.`
+        },
+        jirafa: {
+          icon: '🦒',
+          getStat: (kg) => `${Math.round(kg * 0.028).toLocaleString("en-US")} Árboles secos`,
+          getText: (kg) => `⚠️ La falta de lluvias por la contaminación seca los árboles de donde comen las jirafas, dejándolas sin su principal fuente de alimento.`
+        },
+        elefante: {
+          icon: '🐘',
+          getStat: (kg) => `${Math.round(kg * 1.8).toLocaleString("en-US")} Litros de Agua`,
+          getText: (kg) => `⚠️ Tu huella equivale a que se evaporen <strong>${Math.round(kg * 1.8).toLocaleString("en-US")} litros de agua potable</strong> de los ríos donde beben las manadas de elefantes.`
+        },
+        osopolar: {
+          icon: '🐻‍❄',
+          getStat: (kg) => `${(kg * 0.003).toFixed(1)} m² de Hielo Ártico`,
+          getText: (kg) => `⚠️ Cada cosa que compras o usas que contamina, derrite el hielo. Tu consumo anual derrite <strong>${(kg * 0.003).toFixed(1)} metros cuadrados de hielo</strong>.`
+        },
+        tigre: {
+          icon: '🐅',
+          getStat: (kg) => `${Math.round(kg * 0.05).toLocaleString("en-US")} m² de Manglar`,
+          getText: (kg) => `⚠️ El nivel del mar sube por el calor global. Esto destruye los lugares cerca del agua donde viven los tigres.`
+        },
+        tortuga: {
+          icon: '🐢',
+          getStat: (kg) => `${Math.round(kg * 0.12).toLocaleString("en-US")} Nidos en Riesgo`,
+          getText: (kg) => `⚠️ Cuando la arena de las playas se calienta de más, nacen puras tortugas hembra y se rompe el ciclo natural de la especie.`
+        },
+        delfin: {
+          icon: '🐬',
+          getStat: (kg) => `${(kg * 0.015).toFixed(1)} kg de Plástico`,
+          getText: (kg) => `⚠️ Muchos de los productos y plásticos que consumimos terminan ensuciando los océanos donde viven los delfines y los peces que comen.`
+        },
+        pinguino: {
+          icon: '🐧',
+          getStat: (kg) => `${Math.round(kg * 0.06).toLocaleString("en-US")} Pingüinos Bebés`,
+          getText: (kg) => `⚠️ El hielo de la Antártida se rompe antes de tiempo, haciendo que las crías de pingüino caigan al mar helado antes de crecer.`
+        }
+      };
+
+      const animal = animalData[animalKey] || animalData.ajolote;
+      iconEl.innerText = animal.icon;
+      bigNumEl.innerText = animal.getStat(annualKg);
+      textEl.innerHTML = animal.getText(annualKg);
+    }
+
+    function renderActionPlanDynamic(habitDrivers) {
+      const actionsEl = document.getElementById('out-action-plan-dynamic');
+      const recs = [];
+      const categoriesUsed = new Set();
+      const isPublicTransportOnly = (mobilityMode === 'public');
+
+      for (let i = 0; i < habitDrivers.length; i++) {
+        const habit = habitDrivers[i];
+        if (categoriesUsed.has(habit.category)) continue;
+
+        if (habit.key === 'transport_public' || (isPublicTransportOnly && habit.category === 'transporte')) {
+          categoriesUsed.add('transporte');
+          recs.push({
+            icon: 'fa-bus',
+            text: '<strong>¡Bien por usar transporte público!</strong> Viajar en Metro o Metrobús es de las cosas que más ayudan a evitar la contaminación en la ciudad. ¡Sigue así!'
+          });
+        } else if (habit.key === 'transport_private' && !isPublicTransportOnly) {
+          categoriesUsed.add('transporte_privado');
+          recs.push({
+            icon: 'fa-car-side',
+            text: '<strong>Aprovecha mejor los viajes en auto:</strong> Intenta ponerte de acuerdo con compañeros para compartir coche (carpooling) al menos 1 o 2 días. Dividirán la contaminación a la mitad.'
+          });
+        } else if (habit.key === 'meat_res' || habit.key === 'meat_other') {
+          categoriesUsed.add('alimentacion');
+          recs.push({
+            icon: 'fa-utensils',
+            text: '<strong>Bájale un poco a la carne:</strong> No tienes que ser vegetariano, pero cambiar la res por pollo, atún o frijoles solo 2 veces por semana hace una diferencia gigante en el agua que ahorras.'
+          });
+        } else if (habit.key === 'gas_household' || habit.key === 'electricity') {
+          categoriesUsed.add('energia');
+          recs.push({
+            icon: 'fa-shower',
+            text: '<strong>Báñate con tu canción favorita:</strong> Si intentas que tus baños duren menos de 8 minutos vas a ahorrar muchísimo gas y agua (¡Y le ayudas a la cartera de tu casa!).'
+          });
+        } else if (habit.key === 'takeout_packaging' || habit.key === 'pet_bottles') {
+          categoriesUsed.add('desechables');
+          recs.push({
+            icon: 'fa-box-open',
+            text: '<strong>Lleva tu termo o túpper:</strong> Cuando compres comida en la calle, lleva tu recipiente. En las apps de comida siempre selecciona la opción de "no enviar cubiertos".'
+          });
+        } else if (habit.key === 'shopping_imports' || habit.key === 'local_packages') {
+          categoriesUsed.add('compras');
+          recs.push({
+            icon: 'fa-bag-shopping',
+            text: '<strong>Junta tus pedidos de internet:</strong> En vez de pedir una blusa hoy y algo más mañana, junta tus carritos de compra para que todo llegue en la misma caja y el mismo camión repartidor.'
+          });
+        } else if (habit.key === 'interurban_travel') {
+          categoriesUsed.add('viajes');
+          recs.push({
+            icon: 'fa-plane-departure',
+            text: '<strong>Prefiere el Autobús:</strong> Si viajas a ciudades cerca (a menos de 4 horas), irte en autobús contamina muchísimo menos que un avión o ir tú solo en auto.'
+          });
+        } else if (habit.key === 'unseparated_waste') {
+          categoriesUsed.add('basura');
+          recs.push({
+            icon: 'fa-recycle',
+            text: '<strong>Solo separa lo orgánico:</strong> Con que tengas un botecito solo para restos de comida, ayudas muchísimo a que la basura no apeste ni contamine con gases tóxicos.'
+          });
+        }
+
+        if (recs.length >= 3) break;
+      }
+
+      actionsEl.innerHTML = recs.slice(0, 3).map(r => `
+        <div class="bg-inputtheme p-3 rounded-xl border border-bordertheme flex items-start gap-2.5">
+          <i class="fa-solid ${r.icon} text-brand-emerald mt-0.5 shrink-0 text-sm"></i>
+          <p class="text-xs text-textmain leading-relaxed">${r.text}</p>
+        </div>
+      `).join('');
+    }
+
+    // FUNCIÓN PARA ENVIAR RECOPILACIÓN A GOOGLE SHEETS
+    function enviarResultados() {
+      if (GOOGLE_SCRIPT_URL === "AQUI_PONDREMOS_TU_LINK_DE_GOOGLE") {
+        alert("¡Cuidado! Aún no has puesto tu link de Google Sheets en el código HTML.");
+        return;
+      }
+
+      const btn = document.getElementById('btn-enviar-datos');
+      const textSpan = btn.querySelector('span');
+      textSpan.innerText = 'Guardando tus datos...';
+      btn.disabled = true;
+
+      const totalKgMonthly = parseFloat(document.getElementById('out-co2').innerText);
+      
+      // Determinación estricta de Escala
+      let escalaFinal = "Sostenible";
+      if (totalKgMonthly >= 150 && totalKgMonthly <= 300) {
+        escalaFinal = "Moderada";
+      } else if (totalKgMonthly > 300) {
+        escalaFinal = "Crítica";
+      }
+
+      const rolSel = document.getElementById("select-rol").value;
+      const areaSel = document.getElementById("select-area") ? document.getElementById("select-area").value : "";
+      const carreraSel = document.getElementById("select-carrera") ? document.getElementById("select-carrera").value : "";
+
+      let areaFinal = "No aplico";
+      let carreraFinal = "No aplico";
+
+      if (rolSel === 'Alumno') {
+        if (areaSel === 'Preparatoria') {
+          areaFinal = "Preparatoria";
+          carreraFinal = "No aplico";
+        } else {
+          areaFinal = areaSel;
+          carreraFinal = carreraSel;
+        }
+      } else {
+        areaFinal = "No aplico";
+        carreraFinal = "No aplico";
+      }
+
+      // Estructura exacta de recolección de datos
+      const registro = {
+        fecha: new Date().toLocaleString(),
+        rol: rolSel,
+        area: areaFinal,
+        carrera: carreraFinal,
+        sexo: document.getElementById("select-sexo").value,
+        huellaTotal: totalKgMonthly.toFixed(2),
+        escala: escalaFinal,
+        animal: selectedAnimalKey,
+        top1: currentTop1,
+        top2: currentTop2,
+        top3: currentTop3
+      };
+
+      fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(registro)
+      })
+      .then(() => {
+        alert("¡Listo! Tus resultados fueron guardados correctamente.");
+        textSpan.innerText = '¡Datos Enviados Correctamente!';
+        btn.classList.replace('bg-brand-emerald', 'bg-emerald-700');
+        btn.classList.replace('hover:bg-emerald-600', 'hover:bg-emerald-700');
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("Hubo un problema de conexión. Intenta de nuevo.");
+        textSpan.innerText = 'Guardar y Enviar mis Resultados';
+        btn.disabled = false;
+      });
+    }
+
+    window.onload = function() {
+      handleRolChange();
+      updateCalculations();
+    };
+  </script>
+</body>
+</html>
